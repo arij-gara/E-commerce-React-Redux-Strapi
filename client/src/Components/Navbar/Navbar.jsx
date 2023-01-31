@@ -7,7 +7,10 @@ import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import {Link} from "react-router-dom"
 import Cart from '../../Components/Cart/Cart'
 import "./Navbar.scss"
+import {useSelector} from "react-redux"
+
 export default function Navbar() {
+    const products= useSelector(state =>state.cart.products)
     const[open,setopen]=useState(false)
   return (
     <div className="Navbar">
@@ -53,7 +56,7 @@ export default function Navbar() {
             <FavoriteBorderIcon/>
             <div className="Carticon" onClick={()=>setopen(!open)}>
             <AddShoppingCartIcon/>
-            <span>0</span>
+            <span>{products.length}</span>
             </div>
         </div>
         </div>

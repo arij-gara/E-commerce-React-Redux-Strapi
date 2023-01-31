@@ -1,36 +1,52 @@
 import React ,{useState}from 'react'
 import "./Product.scss"
+import { useParams } from "react-router-dom";
+import useFetch from "../../hooks/useFetch";
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import BalanceIcon from '@mui/icons-material/Balance';
+import { useDispatch } from 'react-redux';
+import { addToCart } from "../../redux/cartreducer";
+
 export default function Product() {
-  const [selectedimg,setselectedimg]= useState(0)
+  const dispatch =useDispatch()
+  const [selectedimg,setselectedimg]= useState("img")
   const [quantity,setquantity]=useState(1)
-  const images = [
-    "https://editorialist.com/wp-content/uploads/2021/04/Trench-Coats_Hero.jpg",
-    "https://www.uniqlo.com/jp/ja/contents/feature/masterpiece/common_22fw/img/item_14_03.jpg?220211"
-  ]
+  const id = useParams().id;
+  const { data, loading, error } = useFetch(`/products/${id}?populate=*`);
+  // const images = [
+  //   "https://editorialist.com/wp-content/uploads/2021/04/Trench-Coats_Hero.jpg",
+  //   "https://www.uniqlo.com/jp/ja/contents/feature/masterpiece/common_22fw/img/item_14_03.jpg?220211"
+  // ]
   return (
     <div className="product">
       <div className="left">
       <div className="images">
-        <img src={images[0]} alt="" onClick={e =>setselectedimg(0)}></img>
-        <img src={images[1]} alt="" onClick={e =>setselectedimg(1)}></img>
+        <img src={ process.env.REACT_APP_UPLOAD_URL +data?.attributes?.img?.data?.attributes?.url} alt="" onClick={e =>setselectedimg("img")}></img>
+        <img src={ process.env.REACT_APP_UPLOAD_URL +data?.attributes?.img2?.data?.attributes?.url} alt="" onClick={e =>setselectedimg("img2")}></img>
       </div>
       <div className="mainimage">
-        <img src={images[selectedimg]} alt=""></img>
+        <img src={process.env.REACT_APP_UPLOAD_URL +
+                  data?.attributes[selectedimg]?.data?.attributes?.url} alt=""></img>
       </div>
       </div>
       <div className='right'>
-        <h1>coat for woman</h1>
-        <span className="price">$19.9</span>
-        <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Aliquam maiores recusandae alias facilis in unde quam ad illum sapiente error perspiciatis dolore, non magnam earum sit animi sequi, possimus porro?</p>
+        <h1>{data?.attributes.title}</h1>
+        <span className="price">${data?.attributes.price}</span>
+        <p>{data?.attributes.desc}</p>
         <div className='quantity'>
           <button onClick={()=>setquantity(prev =>prev ===1 ? 1 :prev-1)}>-</button>
           {quantity}
           <button onClick={()=>setquantity(prev =>prev+1)}>+</button>
         </div>
-        <button className="add">
+        <button className="add" onClick={()=>dispatch(addToCart({
+           id: data.id,
+           title: data.attributes.title,
+           desc: data.attributes.desc,
+           price: data.attributes.price,
+           img: data.attributes.img.data.attributes.url,
+           quantity,
+        }))}>
           <AddShoppingCartIcon/>
           Add to cart
         </button>
